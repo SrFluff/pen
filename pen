@@ -12,6 +12,9 @@ y = "\033[33m"
 r = "\033[0m"
 g = "\033[90m"
 
+def cls():
+    os.system("clear")
+
 def pen_check(file):
     with open(file,"r") as f:
         source = f.read()
@@ -55,44 +58,69 @@ if args[0] == "init":
         exit(1)
     else:
         temp = {}
-        
-        print("Input dependencies separated by semicolons")
-        b = input("> ")
-        if not b == "":
-            temp["dependencies"] = b.split(";")
-        
-        print("Serve command")
-        b = input("> ")
-        if not b == "":
-            temp["serve"] = b
-        
-        print("Build command")
-        b = input("> ")
-        if not b == "":
-            temp["build"] = b
-
-        print("Run test before build? [Y/n]")
-        b = input("> ")
-        if b.lower() != "n":
-            temp["testBeforeBuild"] = True
-        else:
-            temp["testBeforeBuild"] = False
-
-        print("Clean command")
-        b = input("> ")
-        if not b == "":
-            temp["clean"] = b
-
-        print("Input test files separated by semicolons")
-        b = input("> ")
-        if not b == "":
-            temp["testFiles"] = b.split(";")
-
-        with open("project.toml","w") as f:
-            toml.dump(temp,f)
-            f.close()
-        print("project.toml written")
-        exit()
+        tempSub = {
+                "dependencies":[],
+                "serve":"",
+                "build":"",
+                "testBeforeBuild":False,
+                "clean":"",
+                "testFiles":[]
+                }
+        while True:
+            cls()
+            print(f"{y}1.{r} Dependencies:      {y}{', '.join(tempSub['dependencies'])}{r}")
+            print(f"{y}2.{r} Serve:             {y}{tempSub['serve']}{r}")
+            print(f"{y}3.{r} Build:             {y}{tempSub['build']}{r}")
+            if not tempSub['testBeforeBuild']:
+                print(f"{y}4.{r} Test before build: {y}[ ]{r}")
+            else:
+                print(f"{y}4.{r} Test before build: {y}[*]{r}")
+            print(f"{y}5.{r} Clean:             {y}{tempSub['clean']}{r}")
+            print(f"{y}6.{r} Test files:        {y}{', '.join(tempSub['testFiles'])}{r}")
+            print(f"{y}7.{r} Save and quit")
+            a = input(f"> {y}")
+            if a == "1":
+                cls()
+                print(f"{r}Enter dependencies, separated by commas")
+                tempSub['dependencies'] = input(f"> {y}").split(",")
+            elif a == "2":
+                cls()
+                print(f"{r}Enter serve command")
+                tempSub['serve'] = input(f"> {y}")
+            elif a == "3":
+                cls()
+                print(f"{r}Enter build command")
+                tempSub['build'] = input(f"> {y}")
+            elif a == "4":
+                if tempSub['testBeforeBuild']:
+                    tempSub['testBeforeBuild'] = False
+                else:
+                    tempSub['testBeforeBuild'] = True
+            elif a == "5":
+                cls()
+                print(f"{r}Enter clean command")
+                tempSub['clean'] = input(f"> {y}")
+            elif a == "6":
+                cls()
+                print(f"{r}Enter test files, separated by commas")
+                tempSub['testFiles'] = input(f"> {y}").split(",")
+            elif a == "7":
+                if tempSub['dependencies'] != []:
+                    temp['dependencies'] = tempSub['dependencies']
+                if tempSub['serve'] != "":
+                    temp['serve'] = tempSub['serve']
+                if tempSub['build'] != "":
+                    temp['build'] = tempSub['build']
+                temp['testBeforeBuild'] =  tempSub['testBeforeBuild']
+                if tempSub['clean'] != "":
+                    temp['clean'] = tempSub['clean']
+                if tempSub['testFiles'] != []:
+                    temp['testFiles'] = tempSub['testFiles']
+                with open("project.toml","w") as f:
+                    toml.dump(temp,f)
+                    f.close()
+                print(f"{y}project.toml{r} written!")
+                exit()
 
 if args[0] == "version":
     print(version)
