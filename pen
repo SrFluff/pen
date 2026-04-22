@@ -1,0 +1,203 @@
+#!/usr/local/bin/python3
+import os
+import tomllib
+import toml
+from sys import argv
+from importlib.metadata import version as pkg_version
+import ast
+
+args = argv[1:]
+version = "1.0.0"
+y = "\033[33m"
+r = "\033[0m"
+g = "\033[90m"
+
+def pen_check(file):
+    with open(file,"r") as f:
+        source = f.read()
+    try:
+        ast.parse(source)
+    except Exception:
+        return False
+    return True
+
+def pen_help():
+    print("Simple Python project tool\n")
+
+    print("USAGE")
+    
+    print(f"\t{g}pen{r} {y}COMMAND{r}\n")
+
+    print("COMMANDS")
+
+    print(f"\t{y}install{r}        resolve dependencies")
+    print(f"\t{y}dependencies{r}   list dependencies")
+    print(f"\t{y}serve{r}          serve project")
+    print(f"\t{y}build{r}          build project")
+    print(f"\t{y}init{r}           generate a project.toml")
+    print(f"\t{y}clean{r}          clean build artifacts")
+    print(f"\t{y}test{r}           test specific files")
+    print(f"\t{y}lock{r}           generate a requirements.txt lockfile")
+    print(f"\t{y}help{r}           print help message")
+    print(f"\t{y}version{r}        get pen version")
+
+if len(args) == 0 or args[0] == "help":
+    pen_help()
+    exit()
+
+if len(args) > 1:
+    print("pen: Too many arguments, try 'pen help'")
+    exit(1)
+
+if args[0] == "init":
+    if os.path.exists("project.toml"):
+        print("pen: Cannot generate project.toml, file already exists")
+        exit(1)
+    else:
+        temp = {}
+        
+        print("Input dependencies separated by semicolons")
+        b = input("> ")
+        if not b == "":
+            temp["dependencies"] = b.split(";")
+        
+        print("Serve command")
+        b = input("> ")
+        if not b == "":
+            temp["serve"] = b
+        
+        print("Build command")
+        b = input("> ")
+        if not b == "":
+            temp["build"] = b
+
+        print("Run test before build? [Y/n]")
+        b = input("> ")
+        if b.lower() != "n":
+            temp["testBeforeBuild"] = True
+        else:
+            temp["testBeforeBuild"] = False
+
+        print("Clean command")
+        b = input("> ")
+        if not b == "":
+            temp["clean"] = b
+
+        print("Input test files separated by semicolons")
+        b = input("> ")
+        if not b == "":
+            temp["testFiles"] = b.split(";")
+
+        with open("project.toml","w") as f:
+            toml.dump(temp,f)
+            f.close()
+        print("project.toml written")
+        exit()
+
+if args[0] == "version":
+    print(version)
+    exit()
+
+if not os.path.exists("project.toml"):
+    print("pen: No project.toml found")
+    exit(1)
+
+with open("project.toml","rb") as f:
+    data = tomllib.load(f)
+    f.close()
+
+if args[0] == "install":
+    if not "dependencies" in data:
+        print("pen: No dependencies specified in project.toml")
+        exit(1)
+    else:
+        print("Resolving dependencies...")
+        for i in data["dependencies"]:
+            os.system(f"pip install --upgrade {i}")
+        print(f"{y}Done!{r}")
+        exit()
+
+if args[0] == "dependencies":
+    if not "dependencies" in data:
+        print("pen: No dependencies specified in project.toml")
+        exit(1)
+    else:
+        print("Dependencies:")
+        for i in data["dependencies"]:
+            print(f"\t{y}{i}{r}")
+        exit()
+
+if args[0] == "serve":
+    if not "serve" in data:
+        print("pen: No serve command specified in project.toml")
+        exit(1)
+    else:
+        print("Serving...")
+        os.system(data["serve"])
+        print(f"{y}Done!{r}")
+        exit()
+
+if args[0] == "build":
+    if not "build" in data:
+        print("pen: No build command specified in project.toml")
+        exit(1)
+    else:
+        if data["testBeforeBuild"]:
+            kill = False
+            for i in data["testFiles"]:
+                if not os.path.exists(i):
+                    print(f'pen: "{i}" not found, no such file')
+                else:
+                    print(f'Testing {y}"{i}"{r}...')
+                    if pen_check(i):
+                        print(f'{y}"{i}"{r} passed!')
+                    else:
+                        print(f'{y}"{i}"{r} failed!')
+                        kill = True
+            if kill:
+                exit(1)
+        print("Running build command...")
+        os.system(data["build"])
+        print(f"{y}Done!{r}")
+        exit()
+
+if args[0] == "clean":
+    if not "clean" in data:
+        print("pen: No clean command specified in project.toml")
+        exit(1)
+    else:
+        print("Running clean command...")
+        os.system(data["clean"])
+        print(f"{y}Done!{r}")
+        exit()
+
+if args[0] == "test":
+    if not "testFiles" in data:
+        print("pen: No files to test in project.toml")
+        exit(1)
+    else:
+        kill = False
+        for i in data["testFiles"]:
+            if not os.path.exists(i):
+                print(f'pen: "{i}" not found, no such file')
+            else:
+                print(f'Testing {y}"{i}"{r}...')
+                if pen_check(i):
+                    print(f'{y}"{i}"{r} passed!')
+                else:
+                    print(f'{y}"{i}"{r} failed!')
+                    kill = True
+        if kill:
+            exit(1)
+
+if args[0] == "lock":
+    if not "dependencies" in data:
+        print("pen: No dependencies specified in project.toml")
+        exit(1)
+    else:
+        print(f"Writing {y}lockfile{r}...")
+        with open("requirements.txt","w") as f:
+            for i in data["dependencies"]:
+                f.write(f"{i}=={pkg_version(i)}\n")
+            f.close()
+        print(f"{y}Done!{r}")
