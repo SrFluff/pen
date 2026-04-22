@@ -2,7 +2,7 @@
 
 Simple Python build tool\
 \
-To start using Pen, run:\
+To start using Pen, run:
 ```
 pen init
 ```
