@@ -4,6 +4,7 @@ Simple Python build tool\
 \
 To start using Pen, run:
 ```
+pen help
 pen init
 ```
 
