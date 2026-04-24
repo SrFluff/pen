@@ -48,9 +48,7 @@ def pen_help():
     print(f"\t{y}init{r}           generate a project.toml")
     print(f"\t{y}clean{r}          clean build artifacts")
     print(f"\t{y}test{r}           test specific files")
-    print(f"\t{y}lint{r}           lint specific files")
     print(f"\t{y}lock{r}           generate a requirements.txt lockfile")
-    print(f"\t{y}fix{r}            fix linting issues in specific files")
     print(f"\t{y}help{r}           print help message")
     print(f"\t{y}version{r}        get pen version")
 
