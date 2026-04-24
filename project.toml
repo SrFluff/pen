@@ -1,0 +1,5 @@
+dependencies = [ "toml", "ruff",]
+build = "sudo cp pen /usr/local/bin/"
+testBeforeBuild = true
+testFiles = [ "pen",]
+clean = "rm -rf __pycache__/ && rm -rf .ruff_cache/"

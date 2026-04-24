@@ -32,7 +32,9 @@ Pen can remove caches and temporary files with `pen clean`.
 
 ### Testing
 
-Pen can test files without building using the `pen build` command.
+Pen can test files without building using the `pen build` command.\
+Tests include syntax checking and linting. If the linter fails, pen will automatically fix it.\
+*NOTE: Pen relies on ruff as its linter*
 
 ### Lockfiles
 
